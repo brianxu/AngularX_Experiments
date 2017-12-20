@@ -19,6 +19,7 @@ export class DetailsComponent implements OnInit {
     this.detailsService.getDetails().subscribe((result: WikiResult)=>{
       
       this.data = Object.values(result.query.pages);
+      console.log(this.data.length);
     });
   }
 

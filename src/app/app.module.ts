@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import { DetailsComponent } from './details/details.component';
 import { HomeComponent } from './home/home.component';
 import { CoreModule } from './core/core.module';
+import {TransferHttpCacheModule} from '@nguniversal/common';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { CoreModule } from './core/core.module';
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AppRoutingModule,
-    CoreModule
+    CoreModule,
+    TransferHttpCacheModule
   ],
   providers: [],
   bootstrap: [AppComponent]

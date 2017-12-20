@@ -15,6 +15,6 @@ export class DetailsService {
         }
       )
     };
-    return this.http.post(url, httpOptions);
+    return this.http.get(url, httpOptions);
   }
 }
