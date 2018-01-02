@@ -6,8 +6,13 @@ import { renderModuleFactory } from '@angular/platform-server';
 import { enableProdMode } from '@angular/core';
 
 import * as express from 'express';
+import * as bodyParser from 'body-parser';
+import * as cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { readFileSync } from 'fs';
+
+import * as xhr2 from 'xhr2';
+xhr2.prototype._restrictedHeaders.cookie = false;;
 
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
@@ -26,6 +31,9 @@ const { AppServerModuleNgFactory, LAZY_MODULE_MAP } = require('./dist/server/mai
 
 const { provideModuleMap } = require('@nguniversal/module-map-ngfactory-loader');
 
+app.use(bodyParser.json());
+app.use(cookieParser());
+
 app.engine('html', (_, options, callback) => {
   renderModuleFactory(AppServerModuleNgFactory, {
     // Our index.html
@@ -33,7 +41,12 @@ app.engine('html', (_, options, callback) => {
     url: options.req.url,
     // DI so that we can get lazy-loading to work differently (since we need it to just instantly render it)
     extraProviders: [
-      provideModuleMap(LAZY_MODULE_MAP)
+      provideModuleMap(LAZY_MODULE_MAP),
+      {
+				provide: 'REQUEST',
+        useFactory: () => {return options.req},
+        deps: []
+			}
     ]
   }).then(html => {
     callback(null, html);
@@ -49,6 +62,11 @@ app.get('*.*', express.static(join(DIST_FOLDER, 'browser')));
 // All regular routes use the Universal engine
 app.get('*', (req, res) => {
   res.render(join(DIST_FOLDER, 'browser', 'index.html'), { req });
+});
+
+// TODO: implement data requests securely
+app.get('/api/*', (req, res) => {
+  res.status(404).send('data requests are not supported');
 });
 
 // Start up the Node server
